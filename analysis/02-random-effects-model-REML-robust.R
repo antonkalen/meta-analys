@@ -16,6 +16,7 @@ library(ggplot2)
 library(clubSandwich)
 library(broom.mixed)
 library(writexl)
+library(metaviz)
 
 # Set parameters ----------------------------------------------------------
 # In this part, we set all the parameters that we might be interested in changing
@@ -59,7 +60,7 @@ models <- nested_data2 |>
           V = variance,
           random = ~ 1|study_id/es_id,
           data = data,
-          test= "t",
+          test = "t",
           dfs = "contain",
           level = ci
         )
@@ -70,7 +71,7 @@ models <- nested_data2 |>
           V = variance,
           random = ~ 1|es_id,
           data = data,
-          test= "t",
+          test = "t",
           dfs = "contain",
           level = ci
         )
@@ -86,7 +87,7 @@ regtest_model <- rma.mv(
   V = std_err,
   random = ~ 1|study_id/es_id,
   mods = ~ std_err,
-  test= "t",
+  test = "t",
   dfs = "contain",
   data = clean_data
 )
@@ -147,5 +148,4 @@ funnel_mod <- rma.mv(
   data = clean_data
 )
 
-funnel(funnel_mod)
-
+viz_sunset(funnel_mod)
