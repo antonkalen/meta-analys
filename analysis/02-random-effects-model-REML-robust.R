@@ -51,6 +51,16 @@ nested_data2 <- nested_data |>
 
 # Run analysis ------------------------------------------------------------
 
+# Descriptives
+nr_studies <- clean_data |> 
+  summarise(
+    n_effect_sizes = n(),
+    k_studies = n_distinct(study_id),
+    .by = outcome
+  )
+
+# Models
+
 models <- nested_data2 |> 
   mutate(
     model = list(
@@ -104,7 +114,7 @@ results <- models |>
   unnest(clean)
 
 write_xlsx(
-  list(coefs = results, eggers = eggers_result), 
+  list(coefs = results, eggers = eggers_result, nr_studies = nr_studies), 
   here("output", "results_REML_robust.xlsx")
 )
 
@@ -121,7 +131,7 @@ axis_labels_summary <- results |>
 
 results |> 
   ggplot(aes(x = beta, y = outcome)) +
-  geom_vline(xintercept = 0, color = "gray30", size = .3) +
+  geom_vline(xintercept = 0, color = "gray30", linewidth = .3) +
   geom_pointrange(aes(xmin = CI_L, xmax = CI_U)) +
   geom_text(aes(label = m_ci, x = Inf), data = axis_labels_summary) +
   scale_x_continuous(expand = c(0,0)) +
@@ -148,4 +158,15 @@ funnel_mod <- rma.mv(
   data = clean_data
 )
 
-viz_sunset(funnel_mod)
+sunset_plot <- viz_sunset(funnel_mod)
+
+ggsave(
+  "sunset.tiff",
+  plot = sunset_plot,
+  path = "figs",
+  width = 14,
+  height = 14,
+  units = "cm",
+  dpi = 600,
+  compression = "lzw"
+)
